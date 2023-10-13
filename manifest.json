@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "Sf Setup Shortcuts",
+  "description": "Faster navigation through swamps of salesforce setup",
+  "version": "1.0",
+  "action": {
+    "default_popup": "sfshort.html",
+    "default_icon": "sfshort.png"
+  },
+  "permissions": [
+    "tabs",
+    "activeTab",
+    "scripting",
+    "activeTab"
+  ]
+}
