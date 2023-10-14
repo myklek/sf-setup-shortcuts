@@ -4,13 +4,17 @@
   "description": "Faster navigation through swamps of salesforce setup",
   "version": "1.0",
   "action": {
-    "default_popup": "sfshort.html",
+    "default_popup": "./src/sfshort.html",
     "default_icon": "sfshort.png"
+  },
+  "options_ui": {
+    "page": "./src/options.html",
+    "open_in_tab": false
   },
   "permissions": [
     "tabs",
-    "activeTab",
     "scripting",
-    "activeTab"
+    "activeTab",
+    "storage"
   ]
 }
