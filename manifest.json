@@ -11,6 +11,9 @@
     "page": "./src/options.html",
     "open_in_tab": false
   },
+  "background": {
+    "service_worker": "./src/setup.js"
+  },
   "permissions": [
     "tabs",
     "scripting",

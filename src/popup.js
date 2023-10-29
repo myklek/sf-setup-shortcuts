@@ -16,6 +16,19 @@ const restoreShortcuts = async () => {
                         url: url.origin+shortcut.link
                     });
                 });
+
+                //open new tab in a new page on a middle click
+                button.addEventListener("auxclick", (e) => {
+                    if (e.button === 1) {
+                        chrome.tabs.create({
+                            url: url.origin+shortcut.link,
+                            active: false
+                        });
+                    }
+                });
+
+
+
                 document.body.appendChild(button);
 
             });

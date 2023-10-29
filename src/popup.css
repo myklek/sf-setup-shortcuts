@@ -4,7 +4,7 @@ body {
 
 button {
     width: 10rem;
-    height: 1.5rem;
+    height: 1.7rem;
     overflow: hidden;
     text-overflow: ellipsis;
 }
