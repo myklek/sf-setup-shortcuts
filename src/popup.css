@@ -1,0 +1,14 @@
+body {
+    background-color: #009EDB;
+}
+
+button {
+    width: 10rem;
+    height: 1.5rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+img {
+    width: 32px;
+    height: 32px;
+}

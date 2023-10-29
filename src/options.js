@@ -1,5 +1,5 @@
 
-function saveOptionsLabel() {
+function saveShortcutNotification() {
     const status = document.getElementById('status');
     status.textContent = 'Options saved.';
     setTimeout(() => {
@@ -8,18 +8,20 @@ function saveOptionsLabel() {
 }
 
 
-const restoreOptions = () => {
+const refreshShortcutsTable = () => {
     chrome.storage.sync.get(
         ['shortCuts'],
         (items) => {
-            createTableRow(items);
+            //remove table if it exists
+            const table = document.getElementById("shortCuts");
+            table.remove();
+            //create table
+            createTable(items);
         }
     );
 };
 
-const saveRow = (name,link) => {
-    console.log('save row')
-
+const saveNewShortcut = (name,link) => {
     chrome.storage.sync.get(
         ['shortCuts'],
         (items) => {
@@ -32,22 +34,52 @@ const saveRow = (name,link) => {
             chrome.storage.sync.set(
                 { shortCuts: items.shortCuts },
                 () => {
-
-                    saveOptionsLabel();
+                    saveShortcutNotification();
+                    refreshShortcutsTable();
                 }
             );
 
 
         }
     );
-
-
 };
+//modify shortcut function
+const editShortcut = (newName,newLink,oldName,oldLink) => {
+    // if new and old are the same do nothing
+    // else update the shortcut
+    if(newName === oldName && newLink === oldLink){
+        return;
+    }
+
+        chrome.storage.sync.get(
+            ['shortCuts'],
+            (items) => {
+
+                if(items.shortCuts == null){
+                    items.shortCuts = [];
+                }
+                items.shortCuts.forEach((item) => {
+                    if(item.name === oldName && item.link === oldLink){
+                        item.name = newName;
+                        item.link = newLink;
+
+                        chrome.storage.sync.set(
+                            { shortCuts: items.shortCuts },
+                            () => {
+                                refreshShortcutsTable()
+                                saveShortcutNotification();
+                            }
+                        );
+                    }
+                });
 
 
-const removeRow = (name,link) => {
+            });
+}
 
-    //remove row from chrome storage
+
+const removeShortcut = (name,link) => {
+
 chrome.storage.sync.get(
         ['shortCuts'],
         (items) => {
@@ -62,7 +94,8 @@ chrome.storage.sync.get(
                 chrome.storage.sync.set(
                     { shortCuts: items.shortCuts },
                     () => {
-                        saveOptionsLabel();
+                        refreshShortcutsTable()
+                        saveShortcutNotification();
                     }
                 );
         });
@@ -79,10 +112,8 @@ const saveAll = () => {
     );
 }
 
-
-
-const createTableRow = (items) => {
-   //create table and put items inside of it with table headers of name and link
+const createTable = (items) => {
+    //create table and put items inside of it with table headers of name and link
     // also add a remove button for each row
     //add table id to table "shortCuts"
 
@@ -94,7 +125,7 @@ const createTableRow = (items) => {
     const removeHeader = document.createElement("th");
     nameHeader.textContent = "Name";
     linkHeader.textContent = "Link";
-    removeHeader.textContent = "Remove";
+    removeHeader.textContent = "Options";
     tableHeader.appendChild(nameHeader);
     tableHeader.appendChild(linkHeader);
     tableHeader.appendChild(removeHeader);
@@ -102,25 +133,7 @@ const createTableRow = (items) => {
     const currentDiv = document.getElementById("addRow");
     document.body.insertBefore(table, currentDiv);
     items.shortCuts.forEach((item) => {
-        const tableRow = document.createElement("tr");
-        const name = document.createElement("td");
-        const link = document.createElement("td");
-        const remove = document.createElement("td");
-        const removeButton = document.createElement("button");
-        name.textContent = item.name;
-        link.textContent = item.link;
-        removeButton.textContent = "Remove";
-        removeButton.addEventListener('click', () => {
-            //remove the row from the table
-            console.log('click remove');
-            removeRow(item.name,item.link);
-            tableRow.remove();
-        });
-        remove.appendChild(removeButton);
-        tableRow.appendChild(name);
-        tableRow.appendChild(link);
-        tableRow.appendChild(remove);
-        table.appendChild(tableRow);
+        addRowToTable(item, table);
     });
 
 
@@ -128,8 +141,45 @@ const createTableRow = (items) => {
 
 }
 
+function addRowToTable(item, table) {
+    const tableRow = document.createElement("tr");
+    const name = document.createElement("td");
+    const link = document.createElement("td");
+    const remove = document.createElement("td");
+    const removeButton = document.createElement("button");
+    name.textContent = item.name;
+    link.textContent = item.link;
+    name.contentEditable = "true";
+    link.contentEditable = "true";
 
-const addShortcutInputFields = () => {
+
+
+
+    removeButton.textContent = "Remove";
+    removeButton.addEventListener('click', () => {
+        //remove the row from the table
+        removeShortcut(item.name, item.link);
+        tableRow.remove();
+    });
+    remove.appendChild(removeButton);
+    tableRow.appendChild(name);
+    tableRow.appendChild(link);
+    tableRow.appendChild(remove);
+    table.appendChild(tableRow);
+
+    //add event listner on clickout of edit form
+    name.addEventListener('blur', () => {
+        editShortcut(name.textContent,link.textContent,item.name,item.link);
+    });
+    link.addEventListener('blur', () => {
+        editShortcut(name.textContent, link.textContent, item.name, item.link);
+    });
+}
+
+
+
+
+const addInputFields = () => {
 
     //add a row to shortCut table with input fields for name and link and a remove button
 
@@ -153,13 +203,8 @@ const addShortcutInputFields = () => {
     });
     saveButton.textContent = "Save";
     saveButton.addEventListener('click', () => {
-        //save the row to the table
-        name.textContent = nameInput.value;
-        link.textContent = linkInput.value;
-        saveRow(nameInput.value,linkInput.value);
-        removeButton.remove();
-        saveButton.remove();
-        remove.appendChild(removeButton);
+        saveNewShortcut(nameInput.value,linkInput.value);
+
 
     });
     name.appendChild(nameInput);
@@ -171,14 +216,8 @@ const addShortcutInputFields = () => {
     tableRow.appendChild(remove);
     table.appendChild(tableRow);
 
-
-
-
-
 }
 
 
-
-
-document.addEventListener('DOMContentLoaded', restoreOptions);
-document.getElementById('addRow').addEventListener('click', addShortcutInputFields);
+document.addEventListener('DOMContentLoaded', refreshShortcutsTable);
+document.getElementById('addRow').addEventListener('click', addInputFields);
