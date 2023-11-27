@@ -12,12 +12,13 @@
     "open_in_tab": false
   },
   "background": {
-    "service_worker": "./src/setup.js"
+    "service_worker": "./src/background.js"
   },
   "permissions": [
     "tabs",
     "scripting",
     "activeTab",
-    "storage"
+    "storage",
+    "contextMenus"
   ]
 }
