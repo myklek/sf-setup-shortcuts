@@ -1,3 +1,23 @@
+const contextItemId = 'addShortcut';
+const saveNewShortcut = (name,link) => {
+    chrome.storage.sync.get(
+        ['shortCuts'],
+        (items) => {
+
+            if(items.shortCuts == null){
+                items.shortCuts = [];
+            }
+            items.shortCuts.push({name:name,link:link});
+
+            chrome.storage.sync.set(
+                { shortCuts: items.shortCuts },
+                () => {}
+            );
+
+
+        }
+    );
+};
 chrome.runtime.onInstalled.addListener((details) => {
 
     if (details.reason === chrome.runtime.OnInstalledReason.INSTALL) {
@@ -13,7 +33,6 @@ chrome.runtime.onInstalled.addListener((details) => {
         // When a shared module is updated
     }
 });
-
 
 function setDefaultShortcuts() {
 
@@ -40,3 +59,24 @@ function setDefaultShortcuts() {
             }
         });
 }
+
+chrome.contextMenus.create({
+    id: contextItemId,
+    title: 'Add current tab as Shortcut 💾',
+    contexts: ['action']
+})
+
+async function contextClick(info, tab) {
+    const {menuItemId} = info
+
+    if (menuItemId === contextItemId) {
+        let queryOptions = {active: true, lastFocusedWindow: true};
+        let [tab] = await chrome.tabs.query(queryOptions);
+        let url = new URL(tab.url)
+        let name = tab.title;
+        let link = url.pathname;
+        saveNewShortcut(name, link);
+    }
+}
+
+chrome.contextMenus.onClicked.addListener(contextClick)
